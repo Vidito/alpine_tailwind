@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+      html {
+        scroll-behavior: smooth;
+      }
+    </style>
+    <script
+      defer
+      src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.3/dist/cdn.min.js"
+    ></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              vahidlight: "#EEF5FF",
+              vahidcardhover: "#a1daed",
+              vahidblue: "#176B87",
+            },
+          },
+        },
+      };
+    </script>
+    <title>Alpine JS/Tailwind</title>
+  </head>
+  <body class="relative">
+    <!-- =======================  Menu section  ======================= -->
+    <header class="relative p-3 sm:h-14" x-data="{ open: false }">
+      <nav class="container mx-auto flex justify-between items-center">
+        <a href="#"
+          ><div class="text-sm w-5 h-5 rounded-full bg-vahidblue"></div
+        ></a>
+        <button
+          @click="open = ! open"
+          x-text="open ? '╳' : '☰'"
+          x-transition.opacity.duration.500ms
+        ></button>
+      </nav>
+      <div x-show="open" class="pr-3" x-transition.opacity.duration.500ms>
+        <ul
+          class="mt-3 text-vahidblue flex flex-col items-end sm:flex-row sm:justify-center gap-3"
+          x-data="menuItems"
+        >
+          <template x-for="item in menuItems" :key="item.id">
+            <li>
+              <a
+                :href="item.link"
+                class="hover:border-b-2 border-b-vahidblue"
+                x-text="item.name"
+              ></a>
+            </li>
+          </template>
+        </ul>
+      </div>
+    </header>
+    <h1 class="text-center text-vahidblue my-2 text-5xl leading-loose">
+      <span class="text-sm">Made with </span> Alpine JS & Tailwind
+    </h1>
+    <hr class="my-6 container mx-auto" />
+    <div class="container md:grid md:grid-cols-4 mx-auto md:gap-4">
+      <!-- =======================  Left Section  ======================= -->
+      <section class="md:col-span-3 md:border-r">
+        <!-- =======================  Modal Window  ======================= -->
+        <div
+          class="flex items-start pt-6 justify-center modal-wrapper absolute bottom-0 left-0 h-full w-full z-40 backdrop-opacity-95 bg-vahidblue/50"
+          x-data="{open: false}"
+          x-show="open"
+          x-on:open-modal.window="open=true"
+          @keyup.escape.window="open = false"
+        >
+          <div
+            class="modal w-64 h-64 p-4 bg-white"
+            @click.outside="open = false"
+          >
+            <p>Press Escape to Exit</p>
+            <p>Or Click outside to Exit</p>
+          </div>
+        </div>
+        <!-- =======================  Modal Trigger Section  ======================= -->
+
+        <section class="container mx-auto px-2">
+          <p class="text-2xl font-bold">Section 1</p>
+          <p class="text-sm font-bold">
+            Click on the button to trigger Modal,<br />
+            Press <kbd class="bg-gray-100 px-1">Escape</kbd> key or click
+            outside modal to close it. Using
+            <code class="bg-gray-100 px-1">$dispatch</code>
+          </p>
+
+          <button
+            class="btn text-sm mt-4 px-2 py-2 shadow-lg rounded hover:bg-vahidblue hover:text-vahidlight duration-500"
+            x-data
+            @click="$dispatch('open-modal')"
+          >
+            Trigger Modal
+          </button>
+        </section>
+        <!-- =======================  Quote section  ======================= -->
+        <hr class="mt-8 container mx-auto" />
+
+        <section id="section3" class="my-8 container mx-auto">
+          <p class="text-2xl font-bold">Section 2</p>
+          <p class="text-sm font-bold">
+            Getting data from API and displaying it on click
+          </p>
+
+          <div x-data="{ open: false }">
+            <button
+              @click="open = ! open"
+              x-text="open ? 'hide quote' : 'show quote'"
+              class="btn mt-3 text-sm px-2 py-2 shadow-lg rounded hover:bg-vahidblue hover:text-vahidlight duration-500"
+            ></button>
+
+            <div x-show="open" x-html="getQuote" class="p-2"></div>
+          </div>
+        </section>
+        <!-- =======================  Cards section  ======================= -->
+        <hr class="my-6 container mx-auto" />
+        <section class="container mx-auto px-2">
+          <p class="text-2xl font-bold">Section 3</p>
+          <p class="text-sm font-bold">
+            Getting data from JS and displaying with for loop
+          </p>
+
+          <div
+            x-data="people"
+            class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 my-3"
+          >
+            <template x-for="person in people" :key="person.id">
+              <section
+                class="p-3 bg-card shadow-xl rounded hover:bg-vahidblue hover:text-vahidlight hover:duration-500 hover:shadow-2xl"
+              >
+                <h1
+                  x-text="person.name"
+                  class="font-extrabold text-myblue"
+                ></h1>
+                <p class="text-sm font-extralight" x-text="person.position"></p>
+                <hr class="my-1 h-px dark:bg-white border-0 rounded" />
+                <p class="text-sm" x-text="person.description"></p>
+              </section>
+            </template>
+          </div>
+        </section>
+      </section>
+      <!-- =======================  Right Section  ======================= -->
+      <section class="right">
+        <!-- =======================  HackerNews section  ======================= -->
+        <section id="section4" class="container mx-auto px-2">
+          <p class="text-2xl font-bold">Section 4</p>
+          <p class="text-sm font-bold">Getting data from HackerNews</p>
+          <div
+            x-data="{
+          query:'',
+          results:[],
+          performSearch(query){
+            fetch(`https://hn.algolia.com/api/v1/search?query=${query}`)
+            .then(response => response.json())
+            .then(results => this.results = results.hits)
+            
+          },
+          init(){
+            this.$watch('query', (query) => {
+              if (query === ''){
+                this.results = []
+                return
+              }
+              this.performSearch(query)
+            })
+          }
+        }"
+          >
+            <input
+              class="border border-slate-300 px-2 py-1 mt-4"
+              type="text"
+              placeholder="Type in for results"
+              x-model.debounce.500="query"
+            />
+
+            <p x-show="query.length">
+              Your search for <span x-text="query"></span> returned
+              <span x-text="results.length"></span>
+            </p>
+            <div>
+              <template x-for="result in results" :key="result.objectID">
+                <div>
+                  &raquo;
+                  <a
+                    x-bind:href="result.url"
+                    x-text="result.title"
+                    class="text-sm font-light hover:font-normal duration-200"
+                  ></a>
+                </div>
+              </template>
+            </div>
+          </div>
+        </section>
+      </section>
+    </div>
+    <footer class="bg-vahidblue p-3 mt-6">
+      <p
+        class="text-center text-vahidlight"
+        x-data
+        x-text="`&copy;${footerDate} Vahid Niamadpour`"
+      ></p>
+    </footer>
+
+    <script src="script.js"></script>
+  </body>
+</html>
